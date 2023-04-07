@@ -158,8 +158,8 @@
 
             const getCoordinates = (object) => {
                 return (o = {
-                    'x': Math.round(object.getAttribute('x') / mapData.grid.cell_size),
-                    'y': Math.round(object.getAttribute('y') / mapData.grid.cell_size),
+                    'x': Math.round(object.getAttribute('x') / 40),
+                    'y': Math.round(object.getAttribute('y') / 40),
                 });
             };
 
