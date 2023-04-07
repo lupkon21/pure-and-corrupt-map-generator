@@ -10,6 +10,10 @@
             integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
             crossorigin="anonymous"
         />
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺️</text></svg>"
+        />
         <title>SVG File to JSON</title>
         <style>
             .container-sm {
@@ -84,10 +88,18 @@
                     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
 
                     const rectangles = Array.from(svgDoc.getElementsByTagName('rect'));
+                    const paths = Array.from(svgDoc.getElementsByTagName('path'));
+
+                    paths.forEach((path) => {
+                        const rect = convertPathToRectangle(path);
+                        if (rect != null) rectangles.push(rect);
+                    });
 
                     rectangles.forEach((object) => {
                         getObjectTypeByColor(object);
                     });
+
+                    console.log(mapData);
 
                     const mapDataJSON = JSON.stringify(mapData);
                     downloadJSON(mapDataJSON);
@@ -210,6 +222,25 @@
                 link.href = url;
                 link.download = 'map_' + mapData.id + '.json';
                 link.click();
+            };
+
+            const convertPathToRectangle = (path) => {
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+
+                let data = (path.getAttribute('d') + '').split(' ')[1];
+                data = data.split(/[HVZ]/);
+                console.log(data);
+
+                rect.setAttribute('x', data[3]);
+                rect.setAttribute('y', data[0]);
+                rect.setAttribute('width', Math.abs(data[0] - data[2]));
+                rect.setAttribute('height', Math.abs(data[1] - data[3]));
+                rect.setAttribute('fill', path.getAttribute('fill'));
+
+                console.log(rect);
+
+                if (rect.getAttribute('width') != rect.getAttribute('height')) return null;
+                return rect;
             };
         </script>
     </body>
