@@ -14,21 +14,35 @@
             rel="icon"
             href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗺️</text></svg>"
         />
-        <title>SVG File to JSON</title>
+        <title>Map Generator</title>
         <style>
             .container-sm {
-                margin-top: 10px;
+                width: 500px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            h2 {
+                margin-bottom: 20px;
             }
 
             body {
-                background-color: #dddddd;
+                background-color: #293241;
+                color: #ffffff;
+            }
+
+            .card-text {
+                text-align: justify;
             }
         </style>
     </head>
     <body>
         <div class="container-sm">
             <form>
-                <h2 class="text-center">MAP JSON PARSER</h2>
+                <h2 class="text-center">Map Generator 🗺️</h2>
+
                 <div class="input-group mb-3">
                     <span class="input-group-text" id="inputGroup-sizing-default">Map name</span>
                     <input type="text" class="form-control" id="map_name" />
@@ -40,7 +54,19 @@
                 </div>
 
                 <div class="input-group mb-3">
-                    <input type="file" class="form-control" id="svgFileInput" />
+                    <input type="file" class="form-control" id="svgFileInput" accept=".svg" />
+                </div>
+
+                <div class="card text-white bg-success mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">How to use the generator?</h5>
+                        <p class="card-text">
+                            To use the map generator tool, fill in the name and ID of the map, and upload the SVG file
+                            exported from Figma. Make sure there are no blocks with transformations. Once the upload of
+                            SVG file is complete, the generator will generate the map into a JSON file, which you can
+                            then automatically download.
+                        </p>
+                    </div>
                 </div>
             </form>
         </div>
@@ -98,8 +124,6 @@
                     rectangles.forEach((object) => {
                         getObjectTypeByColor(object);
                     });
-
-                    console.log(mapData);
 
                     const mapDataJSON = JSON.stringify(mapData);
                     downloadJSON(mapDataJSON);
@@ -227,17 +251,28 @@
             const convertPathToRectangle = (path) => {
                 const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
 
-                let data = (path.getAttribute('d') + '').split(' ')[1];
+                let data = (path.getAttribute('d') + '').split(' ');
+                if (data.length > 2) {
+                    const origin_data = data;
+                    data = data.slice(-3);
+                    data[0] = data[0].replace('L', 'H');
+                    data[1] = data[1].replace('L', 'H');
+                    data[2] = data[0].split('H')[0] + 'Z';
+                    data = data.join('V');
+                } else {
+                    data = data[1];
+                }
                 data = data.split(/[HVZ]/);
-                console.log(data);
+
+                data = data.filter((el) => {
+                    return el != '';
+                });
 
                 rect.setAttribute('x', data[3]);
                 rect.setAttribute('y', data[0]);
                 rect.setAttribute('width', Math.abs(data[0] - data[2]));
                 rect.setAttribute('height', Math.abs(data[1] - data[3]));
                 rect.setAttribute('fill', path.getAttribute('fill'));
-
-                console.log(rect);
 
                 if (rect.getAttribute('width') != rect.getAttribute('height')) return null;
                 return rect;
