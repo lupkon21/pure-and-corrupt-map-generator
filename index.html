@@ -136,6 +136,7 @@
                 switch (object.getAttribute('fill')) {
                     case TYPE_CONSTANTS.WALLS.COLOR:
                         const wall = getCoordinates(object);
+                        wall.id_asset = 1;
 
                         // Border
                         if (wall.y === 0) {
